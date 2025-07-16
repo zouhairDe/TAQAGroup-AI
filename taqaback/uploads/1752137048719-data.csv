@@ -1,0 +1,24 @@
+Num_equipement,Systeme,Description,Date de détéction de l'anomalie,Description de l'équipement,Section propriétaire,Fiabilité Intégrité,Disponibilté,Process Safety,Criticité
+7d34d01e-6874-40c0-bbdc-77b8bc8ebba8,8ab799f5-144f-420c-b426-3d7e36b13f59,clapet du circuit de ramoange Réchauffeur d'air aprés la soupape 1430HCB10AA201 non étanche,2019-01-01 10:09:10,  ,34MC,1,1,1,3
+64927d6a-f0ff-42fe-a137-fb5a78219e91,a738c0f1-e548-4680-9409-ef6832ec1e32,VIBRATION PALIER VENTILATEUR TIRAGE B COTE LIBRE,2019-01-01 14:09:10,Ventilateur de tirage B,34MC,5,3,3,11
+60c3aaa1-ef3d-48de-a360-bee0b615ffab,39856d3f-08e8-4824-a687-c9c58343a1c0,Remise en état calorifuge vanne pompe de circulation,2019-01-02 14:55:00,Vanne refoulement pompe circulation chaudière,34MD,1,1,3,5
+22592481-646b-4c6e-8bd0-fe73c3f7cf65,93463cf8-6e85-4cbc-9a9a-68d51d0f3813,Remise en état calorifuge des vannes,2019-01-02 14:57:00,SERVOMOTEUR VANNE DE PURGE VAPEUR,34MD,1,2,2,5
+dcd4635e-ec4c-43ec-90f2-3ff21755c46a,f771d801-5357-4818-976c-6a8102b713e2,débouchage trop plein  décrasseur .,2019-01-03 09:44:00,DECRASSEUR,34MC,1,1,2,4
+0c376ae3-65f4-4dca-8bee-88b621145a1d,8ab799f5-144f-420c-b426-3d7e36b13f59,FUITE IMPORTANTE DE VAPEUR PAR TRESSE RAMONEUR IK 14,2019-01-03 09:45:00,RAMONEUR LONG RETRACTABLE N°14 TYPE IKPOUR LES ÉCH,34MC,1,1,3,5
+a0b2e0b5-eb24-4a1c-8057-39cf9ccec2a6,8ab799f5-144f-420c-b426-3d7e36b13f59,soupape non-étanche DU ramoneur IK 31,2019-01-03 09:46:00,SOUPAPE DE RAMONEUR LONG RETRACTABLE N°31 TYPE IK,34MC,1,1,3,5
+e12bf97e-1b54-474b-b94c-2f6ed750d2f1,8ab799f5-144f-420c-b426-3d7e36b13f59,fuite de vapeur à localiser au collecteur des ramoneurs IK32/34/36,2019-01-03 09:49:00,RAMONEUR LONG RETRACTABLE N°34 TYPE IK POUR LES ÉC,34MD,1,1,3,5
+dcd4635e-ec4c-43ec-90f2-3ff21755c46a,f771d801-5357-4818-976c-6a8102b713e2,mise en place des calorifuges autour du décrasseur.,2019-01-03 09:53:00,DECRASSEUR,34MD,1,2,4,7
+0a65f186-3a6d-4dfe-aceb-711cb8ae1f75,c02e2a84-07c0-4d8b-9fc4-857d25702120,prévoir Controller la résistance N°3 de la centrifugeuse huile de graissage turbine,2019-01-03 11:35:00,Système huile turbine,34EL,1,3,1,5
+95d0467c-d218-43cb-8ee2-ee514d6c80f6,c5799184-0dba-4180-a805-1028a4215ab8,fuite d'huile au niveau du transfo-redresseur 5B .,2019-01-03 11:35:00,TRANSFORMATEUR REDRESSEUR CHAMP5 FILE B,34EL,1,1,3,5
+f223673a-4a2d-4d6d-a31c-df65aec8251d,8ab799f5-144f-420c-b426-3d7e36b13f59,PRÉVOIR CONTRÔLE DE PRESSION RAMONAGE RÉCHAUFFEUR D AIR,2019-01-04 09:22:00,AIR HEATER SOOTBLOWER  PESSURE REDUCING STATION,34CT,1,1,1,3
+dbed564b-102d-4a17-8793-d894218b02ab,c111ab6f-a961-43ce-b8fe-54b2abf73628,prévoir contrôle mesure de delta P BROYEUR D,2019-01-04 12:46:00,Transmetteur de Delta Pression Cuve Broyeur D,34CT,1,1,1,3
+46680756-2ac0-4d8f-a0d6-834ba1936c4d,bdc3f038-04d2-461d-9f77-c0f5c77b453c,écart commande position registre air froid,2019-01-04 12:47:00,REGISTRE AIR FROID BROYEUR D.,34CT,1,1,1,3
+dcd4635e-ec4c-43ec-90f2-3ff21755c46a,f771d801-5357-4818-976c-6a8102b713e2,apparition fausse alarme décrasseur off,2019-01-07 08:38:00,DECRASSEUR,34EL,1,2,1,4
+46680756-2ac0-4d8f-a0d6-834ba1936c4d,bdc3f038-04d2-461d-9f77-c0f5c77b453c,prévoir graisser registre d'air froid broyeur d,2019-01-07 14:23:00,REGISTRE AIR FROID BROYEUR D.,34MC,1,1,1,3
+46680756-2ac0-4d8f-a0d6-834ba1936c4d,bdc3f038-04d2-461d-9f77-c0f5c77b453c,coincement registre air froid le coincement et due aux fuites d'air au distributeur d'air,2019-01-07 14:24:00,REGISTRE AIR FROID BROYEUR D.,34CT,1,2,1,4
+dcd4635e-ec4c-43ec-90f2-3ff21755c46a,f771d801-5357-4818-976c-6a8102b713e2,prévoir réglage de la vanne a flotteur.,2019-01-07 14:28:00,DECRASSEUR,34MC,1,1,4,6
+ecd708b4-1faf-49fe-8404-ac315a884479,8ab799f5-144f-420c-b426-3d7e36b13f59,Confection et installation d'une passerelle de passage secours pour la vanne d'isolement ramonage réchauffeur d'air,2019-01-07 14:41:00,Systeme ramonage U3,34MD,1,1,3,5
+6c1c7361-843a-4571-a963-757e871df06b,5f391c46-4f9f-41db-a5bc-95a214d7ddc7,Remplacement vanne de décharge chambre vanne 3 voix des réchauffeurs HP,2019-01-08 10:39:00,HP HTRS BYP-SERV PILOT VLV,34MD,3,4,1,8
+41c4a101-90bd-41c7-8af8-4a277a9165c6,dbdd7242-3784-4edb-a7ee-e99970da137c,Entretien des Ecrans et claviers Stations Operateurs Unité 3,2019-01-09 09:12:32,Système de Supervision et Commande Unité 3,34CT,1,1,1,3
+bb54b33f-efdf-4a76-adcb-9abeeabbd1cd,ffbdb124-3725-45e9-911c-1d14b603eb3e,Remise en état calorifuge,2019-01-09 11:35:00,CORNER 1 ATOMAZING STEAM VENT,34MD,1,1,4,6
+e3f38d34-f1ee-4243-93b2-c347082faf35,cbd40d2b-59cc-4db7-9f41-2986a167df77,prévoir appoint d'huile pompe alimentaire N°10,2019-01-14 16:04:00,Pompe alimentaire  principale  N° 10,34MG,2,3,1,6

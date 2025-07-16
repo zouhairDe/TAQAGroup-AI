@@ -1,0 +1,4 @@
+Num_equipement,Description,Date de detection de l'anomalie,Statut,Priorité,Description equipement,Section proprietaire
+12345-test-1,Leak in cooling system pipeline,2025-06-24 10:00:00,Terminé,1,Cooling Pipeline System,34MC
+67890-test-2,Excessive vibration in pump motor,2025-06-24 11:30:00,Lancé,2,Main Water Pump,34MD
+54321-test-3,Temperature sensor malfunction,2025-06-24 14:15:00,Ordonnancé,3,Temperature Control Unit,34ME 

@@ -1,0 +1,3 @@
+id,title,description,severity,status,equipment_id,section_id,site_id,created_at
+1,Test Anomaly,This is a test anomaly,HIGH,OPEN,1,1,1,2025-01-01T00:00:00.000Z
+2,Another Test,Another test anomaly,MEDIUM,IN_PROGRESS,2,2,1,2025-01-02T00:00:00.000Z

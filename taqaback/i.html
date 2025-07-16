@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anomaly Criticality Prediction Model</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tensorflow/4.2.0/tf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.8em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        .tab {
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            text-align: center;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+            transition: all 0.3s ease;
+        }
+        .upload-section:hover {
+            border-color: #764ba2;
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 5px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .section h3 {
+            color: #333;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            background: linear-gradient(45deg, #ccc, #aaa);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        input[type="file"] {
+            margin-bottom: 15px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        input[type="file"]:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        .prediction-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        input, select, textarea {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 350px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            line-height: 1.4;
+        }
+        .prediction-result {
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 3px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 25px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .criticality-high {
+            background: linear-gradient(45deg, rgba(220, 53, 69, 0.15), rgba(255, 107, 107, 0.15));
+            border-color: #dc3545;
+        }
+        .criticality-medium {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 0.15), rgba(255, 235, 59, 0.15));
+            border-color: #ffc107;
+        }
+        .criticality-low {
+            background: linear-gradient(45deg, rgba(40, 167, 69, 0.15), rgba(102, 187, 106, 0.15));
+            border-color: #28a745;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #666;
+            font-weight: 500;
+        }
+        .model-info {
+            background: linear-gradient(45deg, rgba(40, 167, 69, 0.1), rgba(102, 187, 106, 0.1));
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .model-info h4 {
+            color: #28a745;
+            margin-top: 0;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .success {
+            color: #28a745;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Advanced Anomaly Criticality Prediction</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('data')">📊 Data & Training</button>
+            <button class="tab" onclick="switchTab('model')">🤖 Load Pre-trained Model</button>
+            <button class="tab" onclick="switchTab('predict')">🔮 Make Predictions</button>
+        </div>
+
+        <!-- Data & Training Tab -->
+        <div id="data" class="tab-content active">
+            <div class="upload-section">
+                <h3>📁 Upload Training Data</h3>
+                <input type="file" id="csvFile" accept=".csv" />
+                <p>Upload your CSV file containing anomaly data for training</p>
+                <button onclick="loadData()">Load Data</button>
+            </div>
+
+            <div class="section" id="dataStats" style="display: none;">
+                <h3>📈 Data Statistics</h3>
+                <div class="stats" id="statsContainer"></div>
+                <div class="log" id="dataLog"></div>
+            </div>
+
+            <div class="section" id="trainingSection" style="display: none;">
+                <h3>🎯 Train Model</h3>
+                <div class="controls">
+                    <button onclick="trainModel()" id="trainBtn">Start Training</button>
+                    <button onclick="stopTraining()" id="stopBtn" disabled>Stop Training</button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="trainingProgress"></div>
+                </div>
+                <div class="log" id="trainingLog"></div>
+            </div>
+        </div>
+
+        <!-- Load Pre-trained Model Tab -->
+        <div id="model" class="tab-content">
+            <div class="upload-section">
+                <h3>📥 Load Pre-trained Model</h3>
+                <input type="file" id="modelFile" accept=".json" webkitdirectory />
+                <p>Select the TensorFlow.js model directory (model.json and .bin files)</p>
+                <button onclick="loadPretrainedModel()">Load Model</button>
+            </div>
+
+            <div class="model-info" id="modelInfo" style="display: none;">
+                <h4>✅ Model Loaded Successfully</h4>
+                <div id="modelDetails"></div>
+            </div>
+        </div>
+
+        <!-- Make Predictions Tab -->
+        <div id="predict" class="tab-content">
+            <div class="section">
+                <h3>🔮 Predict Anomaly Criticality</h3>
+                
+                <div class="prediction-form">
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" placeholder="Enter anomaly description..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="systeme">Système:</label>
+                        <select id="systeme">
+                            <option value="">Select System</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="equipement">Description de l'équipement:</label>
+                        <select id="equipement">
+                            <option value="">Select Equipment</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="section">Section propriétaire:</label>
+                        <select id="section">
+                            <option value="">Select Section</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="fiabilite">Fiabilité Intégrité (1-10):</label>
+                        <input type="number" id="fiabilite" min="1" max="10" value="5" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="safety">Process Safety (1-10):</label>
+                        <input type="number" id="safety" min="1" max="10" value="5" />
+                    </div>
+                </div>
+                
+                <button onclick="makePrediction()" id="predictBtn" disabled>Predict Criticality</button>
+                
+                <div id="predictionResult" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let trainedModel = null;
+        let tokenizer = null;
+        let labelEncoders = {};
+        let maxLength = 100;
+        let trainingData = null;
+        let isTraining = false;
+
+        // Tab switching functionality
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Logging function
+        function log(message, elementId = 'dataLog') {
+            const logElement = document.getElementById(elementId);
+            if (logElement) {
+                logElement.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            console.log(message);
+        }
+
+        // Load and parse CSV data
+        async function loadData() {
+            const fileInput = document.getElementById('csvFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a CSV file');
+                return;
+            }
+
+            log('Loading CSV file...', 'dataLog');
+            
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    trainingData = results.data;
+                    processData(trainingData);
+                    document.getElementById('dataStats').style.display = 'block';
+                    document.getElementById('trainingSection').style.display = 'block';
+                },
+                error: function(error) {
+                    log('Error loading file: ' + error.message, 'dataLog');
+                }
+            });
+        }
+
+        // Process and analyze data
+        function processData(data) {
+            log(`Loaded ${data.length} rows of data`, 'dataLog');
+            
+            // Calculate statistics
+            const criticalityValues = data.map(row => parseFloat(row['Criticité'])).filter(val => !isNaN(val));
+            const avgCriticality = criticalityValues.reduce((a, b) => a + b, 0) / criticalityValues.length;
+            const minCriticality = Math.min(...criticalityValues);
+            const maxCriticality = Math.max(...criticalityValues);
+            
+            // Count unique values
+            const uniqueSystems = new Set(data.map(row => row['Systeme'])).size;
+            const uniqueEquipment = new Set(data.map(row => row['Description de l\'équipement'])).size;
+            const uniqueSections = new Set(data.map(row => row['Section propriétaire'])).size;
+
+            // Display statistics
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${data.length}</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avgCriticality.toFixed(1)}</div>
+                    <div class="stat-label">Avg Criticality</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${minCriticality}-${maxCriticality}</div>
+                    <div class="stat-label">Criticality Range</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${uniqueSystems}</div>
+                    <div class="stat-label">Unique Systems</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${uniqueEquipment}</div>
+                    <div class="stat-label">Unique Equipment</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${uniqueSections}</div>
+                    <div class="stat-label">Unique Sections</div>
+                </div>
+            `;
+
+            log(`Data analysis complete. Average criticality: ${avgCriticality.toFixed(2)}`, 'dataLog');
+            
+            // Populate dropdowns
+            populateDropdowns(data);
+        }
+
+        // Populate dropdown menus
+        function populateDropdowns(data) {
+            const systems = [...new Set(data.map(row => row['Systeme']).filter(val => val))];
+            const equipment = [...new Set(data.map(row => row['Description de l\'équipement']).filter(val => val))];
+            const sections = [...new Set(data.map(row => row['Section propriétaire']).filter(val => val))];
+
+            populateSelect('systeme', systems);
+            populateSelect('equipement', equipment);
+            populateSelect('section', sections);
+        }
+
+        function populateSelect(elementId, options) {
+            const select = document.getElementById(elementId);
+            select.innerHTML = '<option value="">Select...</option>';
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                select.appendChild(optionElement);
+            });
+        }
+
+        // Simple tokenizer implementation
+        function createTokenizer(texts, numWords = 5000) {
+            const wordCounts = {};
+            
+            // Count word frequencies
+            texts.forEach(text => {
+                const words = text.toLowerCase().split(/\s+/);
+                words.forEach(word => {
+                    word = word.replace(/[^\w]/g, '');
+                    if (word) {
+                        wordCounts[word] = (wordCounts[word] || 0) + 1;
+                    }
+                });
+            });
+
+            // Sort by frequency and take top words
+            const sortedWords = Object.entries(wordCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, numWords - 1)
+                .map(([word]) => word);
+
+            // Create word index (1-based, 0 reserved for padding)
+            const wordIndex = {};
+            sortedWords.forEach((word, i) => {
+                wordIndex[word] = i + 1;
+            });
+
+            return {
+                wordIndex,
+                textsToSequences: function(texts) {
+                    return texts.map(text => {
+                        const words = text.toLowerCase().split(/\s+/);
+                        return words.map(word => {
+                            word = word.replace(/[^\w]/g, '');
+                            return wordIndex[word] || 0;
+                        }).filter(idx => idx > 0);
+                    });
+                }
+            };
+        }
+
+        // Pad sequences to same length
+        function padSequences(sequences, maxLen, padding = 'post') {
+            return sequences.map(seq => {
+                if (seq.length >= maxLen) {
+                    return seq.slice(0, maxLen);
+                } else {
+                    const padded = [...seq];
+                    const padLength = maxLen - seq.length;
+                    const zeros = new Array(padLength).fill(0);
+                    return padding === 'post' ? padded.concat(zeros) : zeros.concat(padded);
+                }
+            });
+        }
+
+        // Create label encoder
+        function createLabelEncoder(values) {
+            const uniqueValues = [...new Set(values.filter(val => val))];
+            const mapping = {};
+            uniqueValues.forEach((val, i) => {
+                mapping[val] = i;
+            });
+            return {
+                classes: uniqueValues,
+                transform: function(values) {
+                    return values.map(val => mapping[val] || 0);
+                }
+            };
+        }
+
+        // Train model
+        async function trainModel() {
+            if (!trainingData) {
+                alert('Please load training data first');
+                return;
+            }
+
+            isTraining = true;
+            document.getElementById('trainBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            
+            log('Starting model training...', 'trainingLog');
+            
+            try {
+                // Prepare data
+                const descriptions = trainingData.map(row => row['Description'] || '');
+                const criticalities = trainingData.map(row => parseFloat(row['Criticité'])).filter(val => !isNaN(val));
+                
+                // Create tokenizer
+                tokenizer = createTokenizer(descriptions);
+                const sequences = tokenizer.textsToSequences(descriptions);
+                maxLength = Math.min(100, Math.max(...sequences.map(seq => seq.length)));
+                const paddedSequences = padSequences(sequences, maxLength);
+                
+                // Encode categorical features
+                labelEncoders = {
+                    'Systeme': createLabelEncoder(trainingData.map(row => row['Systeme'])),
+                    'Description de l\'équipement': createLabelEncoder(trainingData.map(row => row['Description de l\'équipement'])),
+                    'Section propriétaire': createLabelEncoder(trainingData.map(row => row['Section propriétaire']))
+                };
+
+                // Prepare input tensors
+                const textInput = tf.tensor2d(paddedSequences);
+                const categoricalInputs = [];
+                
+                Object.keys(labelEncoders).forEach(key => {
+                    const values = trainingData.map(row => row[key]);
+                    const encoded = labelEncoders[key].transform(values);
+                    categoricalInputs.push(encoded);
+                });
+                
+                const categoricalInput = tf.tensor2d(categoricalInputs.length > 0 ? 
+                    trainingData.map((_, i) => categoricalInputs.map(arr => arr[i])) : 
+                    trainingData.map(() => [0]));
+                
+                const numericalInput = tf.tensor2d(trainingData.map(row => [
+                    parseFloat(row['Fiabilité Intégrité']) || 5,
+                    parseFloat(row['Process Safety']) || 5
+                ]));
+                
+                const targets = tf.tensor2d(criticalities.map(val => [val]));
+
+                // Create model
+                trainedModel = createSimpleModel();
+                
+                log('Model created, starting training...', 'trainingLog');
+                
+                // Train model
+                await trainedModel.fit([textInput, categoricalInput, numericalInput], targets, {
+                    epochs: 50,
+                    batchSize: 32,
+                    validationSplit: 0.2,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            if (!isTraining) return;
+                            const progress = ((epoch + 1) / 50) * 100;
+                            document.getElementById('trainingProgress').style.width = progress + '%';
+                            log(`Epoch ${epoch + 1}/50 - Loss: ${logs.loss.toFixed(4)}, Val Loss: ${logs.val_loss.toFixed(4)}`, 'trainingLog');
+                        }
+                    }
+                });
+
+                log('Training completed!', 'trainingLog');
+                document.getElementById('predictBtn').disabled = false;
+                
+            } catch (error) {
+                log('Training error: ' + error.message, 'trainingLog');
+            } finally {
+                isTraining = false;
+                document.getElementById('trainBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+            }
+        }
+
+        // Create a simple model
+        function createSimpleModel() {
+            const vocabSize = Object.keys(tokenizer.wordIndex).length + 1;
+            
+            // Text input
+            const textInput = tf.input({shape: [maxLength]});
+            const embedding = tf.layers.embedding({inputDim: vocabSize, outputDim: 32, inputLength: maxLength}).apply(textInput);
+            const flatten1 = tf.layers.flatten().apply(embedding);
+            
+            // Categorical input
+            const categoricalInput = tf.input({shape: [Object.keys(labelEncoders).length]});
+            const dense1 = tf.layers.dense({units: 8, activation: 'relu'}).apply(categoricalInput);
+            
+            // Numerical input
+            const numericalInput = tf.input({shape: [2]});
+            const dense2 = tf.layers.dense({units: 4, activation: 'relu'}).apply(numericalInput);
+            
+            // Combine inputs
+            const combined = tf.layers.concatenate().apply([flatten1, dense1, dense2]);
+            const dense3 = tf.layers.dense({units: 32, activation: 'relu'}).apply(combined);
+            const dropout = tf.layers.dropout({rate: 0.3}).apply(dense3);
+            const dense4 = tf.layers.dense({units: 16, activation: 'relu'}).apply(dropout);
+            const output = tf.layers.dense({units: 1, activation: 'linear'}).apply(dense4);
+            
+            const model = tf.model({inputs: [textInput, categoricalInput, numericalInput], outputs: output});
+            model.compile({optimizer: 'adam', loss: 'meanSquaredError', metrics: ['mae']});
+            
+            return model;
+        }
+
+        // Stop training
+        function stopTraining() {
+            isTraining = false;
+            log('Training stopped by user', 'trainingLog');
+        }
+
+        // Load pre-trained model
+        async function loadPretrainedModel() {
+            // For demo purposes, we'll create a mock model
+            // In real implementation, this would load from uploaded files
+            alert('Pre-trained model loading feature requires actual model files. Please use the training tab to create a model.');
+        }
+
+        // Make prediction
+        async function makePrediction() {
+            if (!trainedModel) {
+                alert('Please train a model first or load a pre-trained model');
+                return;
+            }
+
+            const description = document.getElementById('description').value;
+            const systeme = document.getElementById('systeme').value;
+            const equipement = document.getElementById('equipement').value;
+            const section = document.getElementById('section').value;
+            const fiabilite = parseFloat(document.getElementById('fiabilite').value);
+            const safety = parseFloat(document.getElementById('safety').value);
+
+            if (!description) {
+                alert('Please enter a description');
+                return;
+            }
+
+            try {
+                // Preprocess inputs
+                const sequences = tokenizer.textsToSequences([description]);
+                const paddedSequences = padSequences(sequences, maxLength);
+                const textInput = tf.tensor2d(paddedSequences);
+                
+                const categoricalValues = [systeme, equipement, section];
+                const encodedCategorical = Object.keys(labelEncoders).map((key, i) => {
+                    const value = categoricalValues[i];
+                    return labelEncoders[key].transform([value])[0];
+                });
+                const categoricalInput = tf.tensor2d([encodedCategorical]);
+                
+                const numericalInput = tf.tensor2d([[fiabilite, safety]]);
+                
+                // Make prediction
+                const prediction = trainedModel.predict([textInput, categoricalInput, numericalInput]);
+                const predictionValue = await prediction.data();
+                const criticality = predictionValue[0];
+                
+                // Display result
+                displayPredictionResult(criticality, description);
+                
+                // Clean up tensors
+                textInput.dispose();
+                categoricalInput.dispose();
+                numericalInput.dispose();
+                prediction.dispose();
+                
+            } catch (error) {
+                alert('Prediction error: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // Display prediction result
+        function displayPredictionResult(criticality, description) {
+            const resultElement = document.getElementById('predictionResult');
+            const roundedCriticality = Math.round(criticality);
+            
+            let criticalityClass = 'criticality-low';
+            let criticalityText = 'Low';
+            let icon = '🟢';
+            
+            if (roundedCriticality >= 8) {
+                criticalityClass = 'criticality-high';
+                criticalityText = 'High';
+                icon = '🔴';
+            } else if (roundedCriticality >= 5) {
+                criticalityClass = 'criticality-medium';
+                criticalityText = 'Medium';
+                icon = '🟡';
+            }
+            
+            resultElement.className = `prediction-result ${criticalityClass}`;
+            resultElement.innerHTML = `
+                <h3>${icon} Prediction Result</h3>
+                <p><strong>Description:</strong> ${description}</p>
+                <p><strong>Predicted Criticality:</strong> ${criticality.toFixed(2)} (${criticalityText})</p>
+                <p class="success">Model executed successfully 🎯</p>
+            `;
+            resultElement.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

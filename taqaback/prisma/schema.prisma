@@ -1,0 +1,650 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model BronzeAnomaliesRaw {
+  id                    String    @id @default(cuid())
+  numEquipement         String?   @map("num_equipement")
+  description           String?
+  dateDetectionAnomalie String?   @map("date_detection_anomalie")
+  descriptionEquipement String?   @map("description_equipement")
+  sectionProprietaire   String?   @map("section_proprietaire")
+  sourceFile            String    @map("source_file")
+  rawData               Json?     @map("raw_data")
+  ingestedAt            DateTime  @default(now()) @map("ingested_at")
+  processedAt           DateTime? @map("processed_at")
+  isProcessed           Boolean   @default(false) @map("is_processed")
+  criticite             String?
+  disponibilite         String?
+  fiabiliteIntegrite    String?   @map("fiabilite_integrite")
+  processSafety         String?   @map("process_safety")
+  systeme               String?
+  equipmentId           String?   @map("equipment_id")
+
+  @@index([isProcessed])
+  @@index([ingestedAt])
+  @@index([sourceFile])
+  @@map("bronze_anomalies_raw")
+}
+
+model SilverAnomaliesClean {
+  id                    String   @id @default(cuid())
+  numEquipement         String   @map("num_equipement")
+  description           String
+  dateDetectionAnomalie DateTime @map("date_detection_anomalie")
+  descriptionEquipement String   @map("description_equipement")
+  sectionProprietaire   String   @map("section_proprietaire")
+  dataQualityScore      Float?   @map("data_quality_score")
+  validationErrors      Json?    @map("validation_errors")
+  bronzeSourceId        String   @unique @map("bronze_source_id")
+  processedAt           DateTime @default(now()) @map("processed_at")
+  lastModified          DateTime @updatedAt @map("last_modified")
+  criticite             String?
+  disponibilite         Int?
+  fiabiliteIntegrite    Int?     @map("fiabilite_integrite")
+  normalizedFields      Json?    @map("normalized_fields")
+  processSafety         Int?     @map("process_safety")
+  systeme               String?
+  equipmentId           String?  @map("equipment_id")
+
+  @@index([numEquipement])
+  @@index([dateDetectionAnomalie])
+  @@index([sectionProprietaire])
+  @@index([processedAt])
+  @@index([criticite])
+  @@map("silver_anomalies_clean")
+}
+
+model DataProcessingLog {
+  id               String    @id @default(cuid())
+  jobName          String    @map("job_name")
+  sourceLayer      String?   @map("source_layer")
+  targetLayer      String?   @map("target_layer")
+  recordsProcessed Int       @map("records_processed")
+  recordsSucceeded Int       @map("records_succeeded")
+  recordsFailed    Int       @map("records_failed")
+  startTime        DateTime  @map("start_time")
+  endTime          DateTime? @map("end_time")
+  status           String    @map("status")
+  errorMessage     String?   @map("error_message")
+  metadata         Json?
+
+  @@index([jobName])
+  @@index([startTime])
+  @@index([status])
+  @@map("data_processing_logs")
+}
+
+model User {
+  id                String       @id @default(cuid())
+  email             String       @unique
+  role              String       @default("user")
+  password          String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  isActive          Boolean      @default(true)
+  name              String?
+  assignedAnomalies Anomaly[]    @relation("AssignedTo")
+  reportedAnomalies Anomaly[]    @relation("ReportedBy")
+  comments          Comment[]
+  approvedRex       REXEntry[]   @relation("REXApprover")
+  createdRex        REXEntry[]   @relation("REXCreator")
+  assignedSlots     Slot[]       @relation("SlotAssignee")
+  createdSlots      Slot[]       @relation("SlotCreator")
+  ledTeams          Team[]       @relation("TeamLead")
+  profile           UserProfile?
+  actions           AnomalyAction[]
+
+  @@index([email])
+  @@index([role])
+  @@index([isActive])
+  @@map("User")
+}
+
+model UserProfile {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  department   String?
+  site         String?
+  phone        String?
+  isFirstLogin Boolean   @default(true)
+  lastLogin    DateTime?
+  createdBy    String?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([site])
+  @@map("user_profiles")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@map("departments")
+}
+
+model Site {
+  id          String      @id @default(cuid())
+  name        String
+  code        String      @unique
+  location    String
+  capacity    String?
+  status      String
+  coordinates Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  equipment   Equipment[]
+  zones       Zone[]
+
+  @@index([code])
+  @@index([status])
+  @@map("sites")
+}
+
+model Team {
+  id          String            @id @default(cuid())
+  name        String
+  code        String            @unique
+  type        String
+  leadId      String?
+  specialties String[]
+  location    String
+  isActive    Boolean           @default(true)
+  rating      Float?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  assignments Anomaly[]
+  maintenance MaintenanceTask[] @relation("MaintenanceTeam")
+  slots       Slot[]            @relation("SlotTeam")
+  members     TeamMember[]
+  leader      User?             @relation("TeamLead", fields: [leadId], references: [id])
+  actions     AnomalyAction[]
+
+  @@index([code])
+  @@index([type])
+  @@index([leadId])
+  @@index([isActive])
+  @@map("teams")
+}
+
+model TeamMember {
+  id         String   @id @default(cuid())
+  teamId     String
+  userId     String
+  role       String
+  skills     String[]
+  experience String?
+  rating     Float?
+  joinedAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+  @@map("team_members")
+}
+
+model Zone {
+  id          String      @id @default(cuid())
+  name        String
+  code        String
+  siteId      String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  equipment   Equipment[]
+  site        Site        @relation(fields: [siteId], references: [id], onDelete: Cascade)
+
+  @@index([siteId])
+  @@index([code])
+  @@map("zones")
+}
+
+model Equipment {
+  id              String    @id @default(cuid())
+  name            String
+  code            String    @unique
+  description     String?
+  type            String
+  category        String?
+  siteId          String
+  zoneId          String?
+  status          String    @default("operational")
+  manufacturer    String?
+  model           String?
+  serialNumber    String?
+  installDate     DateTime?
+  lastMaintenance DateTime?
+  nextMaintenance DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  anomalies       Anomaly[]
+  site            Site      @relation(fields: [siteId], references: [id])
+  zone            Zone?     @relation(fields: [zoneId], references: [id])
+
+  @@index([code])
+  @@index([type])
+  @@index([status])
+  @@index([siteId])
+  @@index([zoneId])
+  @@map("equipment")
+}
+
+model Anomaly {
+  id                  String       @id @default(cuid())
+  code                String       @unique
+  title               String
+  description         String
+  equipmentId         String?
+  severity            String
+  status              String
+  priority            String
+  category            String
+  origin              String
+  assignedToId        String?
+  assignedTeamId      String?
+  reportedById        String
+  reportedAt          DateTime     @default(now())
+  safetyImpact        Boolean      @default(false)
+  environmentalImpact Boolean      @default(false)
+  productionImpact    Boolean      @default(false)
+  estimatedCost       Float?
+  actualCost          Float?
+  downtimeHours       Float?
+  durationToResolve   Float?
+  slaHours            Int?
+  dueDate             DateTime?
+  resolvedAt          DateTime?
+  aiConfidence        Float?
+  aiSuggestedSeverity String?
+  aiFactors           String[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+  equipmentIdentifier String
+  criticite           String?
+  disponibilite       Int?
+  fiabilite           Int?
+  processSafety       Int?         @map("process_safety")
+  systeme             String?
+  assignedTeam        Team?        @relation(fields: [assignedTeamId], references: [id])
+  assignedTo          User?        @relation("AssignedTo", fields: [assignedToId], references: [id])
+  equipment           Equipment?   @relation(fields: [equipmentId], references: [id])
+  reportedBy          User         @relation("ReportedBy", fields: [reportedById], references: [id])
+  attachments         Attachment[]
+  comments            Comment[]
+  rexEntries          REXEntry[]
+  slots               Slot[]
+  actions             AnomalyAction[]
+
+  @@index([code])
+  @@index([severity])
+  @@index([status])
+  @@index([priority])
+  @@index([category])
+  @@index([equipmentId])
+  @@index([assignedToId])
+  @@index([assignedTeamId])
+  @@index([reportedById])
+  @@index([reportedAt])
+  @@index([dueDate])
+  @@map("anomalies")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  anomalyId String?
+  authorId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  helpful   Int       @default(0)
+  rexId     String?
+  anomaly   Anomaly?  @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+  author    User      @relation(fields: [authorId], references: [id])
+  rex       REXEntry? @relation("REXComments", fields: [rexId], references: [id], onDelete: Cascade)
+
+  @@index([anomalyId])
+  @@index([rexId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model Attachment {
+  id           String     @id @default(cuid())
+  filename     String
+  fileUrl      String
+  fileType     String
+  fileSize     Int
+  anomalyId    String?
+  rexId        String?
+  uploadedById String
+  uploadedAt   DateTime   @default(now())
+  fileId       String     @unique // Reference to FileStorage
+  file         FileStorage @relation(fields: [fileId], references: [id])
+  anomaly      Anomaly?   @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+  rex          REXEntry?  @relation(fields: [rexId], references: [id], onDelete: Cascade)
+
+  @@index([anomalyId])
+  @@index([rexId])
+  @@index([uploadedById])
+  @@index([fileId])
+  @@map("attachments")
+}
+
+model MaintenanceTask {
+  id                 String   @id @default(cuid())
+  code               String   @unique
+  title              String
+  description        String
+  type               String
+  priority           String
+  status             String
+  startDate          DateTime
+  endDate            DateTime
+  duration           Int
+  plannedDowntime    Float?
+  actualDowntime     Float?
+  assignedTeamId     String?
+  assignedToId       String?
+  siteId             String?
+  zoneId             String?
+  equipmentIds       String[]
+  estimatedCost      Float?
+  actualCost         Float?
+  resourcesNeeded    String[]
+  safetyRequirements String[]
+  weatherDependency  Boolean  @default(false)
+  criticalPath       Boolean  @default(false)
+  linkedAnomalyIds   String[]
+  completionRate     Int      @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  assignedTeam       Team?    @relation("MaintenanceTeam", fields: [assignedTeamId], references: [id])
+
+  @@index([code])
+  @@index([type])
+  @@index([status])
+  @@index([priority])
+  @@index([assignedTeamId])
+  @@index([assignedToId])
+  @@index([startDate])
+  @@index([endDate])
+  @@map("maintenance_tasks")
+}
+
+model REXEntry {
+  id                  String       @id @default(cuid())
+  code                String       @unique
+  title               String
+  anomalyId           String?
+  equipmentId         String?
+  equipmentType       String?
+  category            String
+  subcategory         String?
+  site                String
+  zone                String?
+  status              String
+  priority            String
+  rootCause           String
+  lessonsLearned      String
+  preventiveActions   String[]
+  solution            String
+  timeToResolve       String?
+  costImpact          String?
+  downtimeHours       Float?
+  safetyImpact        Boolean      @default(false)
+  environmentalImpact Boolean      @default(false)
+  productionImpact    Boolean      @default(false)
+  tags                String[]
+  knowledgeValue      String
+  reusabilityScore    Float?
+  rating              Float?
+  votes               Int          @default(0)
+  views               Int          @default(0)
+  bookmarks           Int          @default(0)
+  relatedAnomalyIds   String[]
+  createdById         String
+  createdAt           DateTime     @default(now())
+  approvedById        String?
+  approvedAt          DateTime?
+  updatedAt           DateTime     @updatedAt
+  building            String?
+  effectiveness       Int?
+  impactLevel         String?
+  attachments         Attachment[]
+  comments            Comment[]    @relation("REXComments")
+  anomaly             Anomaly?     @relation(fields: [anomalyId], references: [id])
+  approvedBy          User?        @relation("REXApprover", fields: [approvedById], references: [id])
+  createdBy           User         @relation("REXCreator", fields: [createdById], references: [id])
+
+  @@index([code])
+  @@index([status])
+  @@index([category])
+  @@index([knowledgeValue])
+  @@index([createdById])
+  @@index([anomalyId])
+  @@index([createdAt])
+  @@map("rex_entries")
+}
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String
+  type      String
+  isActive  Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@index([category])
+  @@index([key])
+  @@map("system_settings")
+}
+
+model NotificationSetting {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  emailEnabled         Boolean  @default(true)
+  smsEnabled           Boolean  @default(false)
+  pushEnabled          Boolean  @default(true)
+  criticalAnomalies    Boolean  @default(true)
+  maintenanceReminders Boolean  @default(true)
+  teamAssignments      Boolean  @default(true)
+  systemAlerts         Boolean  @default(true)
+  weeklyReports        Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("notification_settings")
+}
+
+model KPIMetric {
+  id            String   @id @default(cuid())
+  name          String
+  category      String
+  value         Float
+  previousValue Float?
+  change        Float?
+  trend         String?
+  target        Float?
+  unit          String?
+  status        String?
+  period        String
+  calculatedAt  DateTime @default(now())
+  siteId        String?
+
+  @@index([name])
+  @@index([category])
+  @@index([period])
+  @@index([calculatedAt])
+  @@index([siteId])
+  @@map("kpi_metrics")
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  name        String
+  type        String
+  parameters  Json
+  generatedBy String
+  generatedAt DateTime @default(now())
+  fileUrl     String?
+
+  @@index([type])
+  @@index([generatedBy])
+  @@index([generatedAt])
+  @@map("reports")
+}
+
+model MaintenancePeriod {
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  startDate     DateTime
+  endDate       DateTime
+  durationDays  Int
+  durationHours Int
+  status        String   @default("available")
+  type          String   @default("maintenance")
+  assignedTo    String?
+  location      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  slots         Slot[]
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@index([type])
+  @@map("maintenance_periods")
+}
+
+model Slot {
+  id                  String             @id @default(cuid())
+  code                String             @unique
+  title               String
+  description         String?
+  anomalyId           String
+  estimatedDuration   Int?
+  actualDuration      Int?
+  status              String             @default("scheduled")
+  priority            String
+  createdById         String
+  assignedTeamId      String?
+  assignedToId        String?
+  windowType          String
+  downtime            Boolean            @default(false)
+  safetyPrecautions   String[]
+  resourcesNeeded     String[]
+  estimatedCost       Float?
+  actualCost          Float?
+  productionImpact    Boolean            @default(false)
+  notes               String?
+  completionNotes     String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  scheduledAt         DateTime?
+  startedAt           DateTime?
+  completedAt         DateTime?
+  maintenancePeriodId String?
+  anomaly             Anomaly            @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+  assignedTeam        Team?              @relation("SlotTeam", fields: [assignedTeamId], references: [id])
+  assignedTo          User?              @relation("SlotAssignee", fields: [assignedToId], references: [id])
+  createdBy           User               @relation("SlotCreator", fields: [createdById], references: [id])
+  maintenancePeriod   MaintenancePeriod? @relation(fields: [maintenancePeriodId], references: [id])
+
+  @@index([code])
+  @@index([anomalyId])
+  @@index([maintenancePeriodId])
+  @@index([createdById])
+  @@index([assignedTeamId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([windowType])
+  @@map("slots")
+}
+
+model FileStorage {
+  id          String     @id @default(cuid())
+  filename    String    // Original filename
+  path        String    // Storage path or URL
+  mimeType    String    // File MIME type
+  size        Int       // File size in bytes
+  bucket      String?   // Storage bucket name (if using cloud storage)
+  key         String?   // Storage key/path (if using cloud storage)
+  metadata    Json?     // Additional metadata
+  uploadedBy  String    // User ID who uploaded the file
+  uploadedAt  DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isPublic    Boolean   @default(false)
+  status      String    @default("active") // active, archived, deleted
+  entityType  String?   // Type of entity this file is associated with
+  entityId    String?   // ID of the associated entity
+  tags        String[]  // Array of tags for categorization
+  description String?   // Optional description of the file
+  checksum    String?   // File checksum for integrity verification
+  version     Int       @default(1) // Version number for file versioning
+  attachment  Attachment?
+
+  @@index([uploadedBy])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([uploadedAt])
+  @@index([bucket, key])
+  @@map("file_storage")
+}
+
+model AnomalyAction {
+  id          String    @id @default(cuid())
+  anomalyId   String    // Reference to the anomaly
+  type        String    // Type of action (created, assigned, status_change, maintenance, comment, attachment, etc.)
+  title       String    // Title of the action (e.g., "Anomalie créée", "Statut mis à jour")
+  description String    // Detailed description of what happened
+  metadata    Json?     // Additional data specific to the action type
+  performedById String  // User who performed the action
+  teamId      String?   // Team involved in the action (if applicable)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  status      String?   // Status after this action (if action changed status)
+  priority    String?   // Priority after this action (if action changed priority)
+  severity    String?   // Severity after this action (if action changed severity)
+  category    String?   // Action category (for filtering and grouping)
+  impact      Json?     // Impact assessment after this action
+  maintenanceData Json? // Maintenance-specific data if action is maintenance-related
+  attachments String[]  // Array of attachment IDs related to this action
+  isAutomated Boolean   @default(false) // Whether action was automated or manual
+  aiConfidence Float?   // AI confidence score if action was AI-assisted
+  
+  // Relations
+  anomaly     Anomaly   @relation(fields: [anomalyId], references: [id], onDelete: Cascade)
+  performedBy User      @relation(fields: [performedById], references: [id])
+  team        Team?     @relation(fields: [teamId], references: [id])
+
+  @@index([anomalyId])
+  @@index([type])
+  @@index([performedById])
+  @@index([teamId])
+  @@index([createdAt])
+  @@index([category])
+  @@map("anomaly_actions")
+}

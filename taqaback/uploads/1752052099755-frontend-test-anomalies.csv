@@ -1,0 +1,4 @@
+Num_equipement,Description,Date de detection de l'anomalie,Statut,Priorité,Description equipement,Section proprietaire
+FT-001,Frontend test anomaly - Cooling system leak,2025-07-09 10:00:00,Ouvert,1,Cooling System Pipeline,34MC
+FT-002,Frontend test anomaly - Motor vibration,2025-07-09 11:30:00,En cours,2,Main Water Pump Motor,34MD
+FT-003,Frontend test anomaly - Sensor malfunction,2025-07-09 14:15:00,Terminé,3,Temperature Sensor Unit,34ME

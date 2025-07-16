@@ -1,0 +1,8 @@
+Num_equipement,Systeme,Description,Date de détéction de l'anomalie,Description de l'équipement,Section propriétaire,Fiabilité Intégrité,Disponibilté,Process Safety,Criticité
+7d34d01e-6874-40c0-bbdc-77b8bc8ebba8,8ab799f5-144f-420c-b426-3d7e36b13f59,clapet du circuit de ramoange Réchauffeur d'air aprés la soupape 1430HCB10AA201 non étanche,2019-01-01 10:09:10,  ,34MC,1,1,1,3
+64927d6a-f0ff-42fe-a137-fb5a78219e91,a738c0f1-e548-4680-9409-ef6832ec1e32,VIBRATION PALIER VENTILATEUR TIRAGE B COTE LIBRE,2019-01-01 14:09:10,Ventilateur de tirage B,34MC,5,3,3,11
+60c3aaa1-ef3d-48de-a360-bee0b615ffab,39856d3f-08e8-4824-a687-c9c58343a1c0,Remise en état calorifuge vanne pompe de circulation,2019-01-02 14:55:00,Vanne refoulement pompe circulation chaudière,34MD,1,1,3,5
+22592481-646b-4c6e-8bd0-fe73c3f7cf65,93463cf8-6e85-4cbc-9a9a-68d51d0f3813,Remise en état calorifuge des vannes,2019-01-02 14:57:00,SERVOMOTEUR VANNE DE PURGE VAPEUR,34MD,1,2,2,5
+dcd4635e-ec4c-43ec-90f2-3ff21755c46a,f771d801-5357-4818-976c-6a8102b713e2,débouchage trop plein  décrasseur .,2019-01-03 09:44:00,DECRASSEUR,34MC,1,1,2,4
+0c376ae3-65f4-4dca-8bee-88b621145a1d,8ab799f5-144f-420c-b426-3d7e36b13f59,FUITE IMPORTANTE DE VAPEUR PAR TRESSE RAMONEUR IK 14,2019-01-03 09:45:00,RAMONEUR LONG RETRACTABLE N°14 TYPE IKPOUR LES ÉCH,34MC,1,1,3,5
+a0b2e0b5-eb24-4a1c-8057-39cf9ccec2a6,8ab799f5-144f-420c-b426-3d7e36b13f59,soupape non-étanche DU ramoneur IK 31,2019-01-03 09:46:00,SOUPAPE DE RAMONEUR LONG RETRACTABLE N°31 TYPE IK,34MC,1,1,3,5

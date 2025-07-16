@@ -1,0 +1,4 @@
+Num_equipement,Systeme,Description,Date de détéction de l'anomalie,Description de l'équipement,Section propriétaire,reportedById,priority,category,status
+EQ001,SYS001,Test Anomaly 1,2024-01-15T10:30:00Z,Test equipment 1,Section A,user123,P2,MECHANICAL,open
+EQ002,SYS002,Test Anomaly 2,2024-01-16T14:20:00Z,Test equipment 2,Section B,user456,P1,ELECTRICAL,open
+EQ003,SYS003,Test Anomaly 3,2024-01-17T09:15:00Z,Test equipment 3,Section C,user789,P3,OPERATIONAL,in_progress

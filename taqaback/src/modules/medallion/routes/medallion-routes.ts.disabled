@@ -1,0 +1,362 @@
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+// import { MedallionHandler } from '../handlers/medallion-handler'; // Disabled due to missing schema models
+import { createLogger } from '../../../core/utils/logger';
+
+const logger = createLogger('MedallionRoutes');
+
+/**
+ * Register medallion architecture routes
+ */
+export async function registerMedallionRoutes(server: FastifyInstance): Promise<void> {
+  const medallionHandler = new MedallionHandler();
+
+  // Import CSV file into Bronze layer
+  server.post('/medallion/import/csv', {
+    schema: {
+      description: 'Import CSV file into Bronze layer',
+      tags: ['Medallion'],
+      consumes: ['multipart/form-data'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            result: {
+              type: 'object',
+              properties: {
+                totalRows: { type: 'number' },
+                successCount: { type: 'number' },
+                errorCount: { type: 'number' },
+                errors: { type: 'array', items: { type: 'string' } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.importCSVFile(request, reply);
+  });
+
+  // Import sample data into Bronze layer
+  server.post('/medallion/import/sample', {
+    schema: {
+      description: 'Import sample anomaly data into Bronze layer',
+      tags: ['Medallion'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            result: {
+              type: 'object',
+              properties: {
+                totalRows: { type: 'number' },
+                successCount: { type: 'number' },
+                errorCount: { type: 'number' },
+                errors: { type: 'array', items: { type: 'string' } }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.importSampleData(request, reply);
+  });
+
+  // Process Bronze to Silver layer
+  server.post('/medallion/process/bronze-to-silver', {
+    schema: {
+      description: 'Process data from Bronze to Silver layer (cleanse and validate)',
+      tags: ['Medallion'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            result: {
+              type: 'object',
+              properties: {
+                recordsProcessed: { type: 'number' },
+                recordsSucceeded: { type: 'number' },
+                recordsFailed: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.processBronzeToSilver(request, reply);
+  });
+
+  // Process Silver to Gold layer
+  server.post('/medallion/process/silver-to-gold', {
+    schema: {
+      description: 'Process data from Silver to Gold layer (aggregate and analyze)',
+      tags: ['Medallion'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            result: {
+              type: 'object',
+              properties: {
+                recordsProcessed: { type: 'number' },
+                recordsSucceeded: { type: 'number' },
+                recordsFailed: { type: 'number' }
+              }
+            }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.processSilverToGold(request, reply);
+  });
+
+  // Get Bronze layer statistics
+  server.get('/medallion/stats/bronze', {
+    schema: {
+      description: 'Get Bronze layer statistics',
+      tags: ['Medallion'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            totalRecords: { type: 'number' },
+            processedRecords: { type: 'number' },
+            unprocessedRecords: { type: 'number' },
+            recentImports: { type: 'array' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.getBronzeStats(request, reply);
+  });
+
+  // Get Silver layer statistics
+  server.get('/medallion/stats/silver', {
+    schema: {
+      description: 'Get Silver layer statistics',
+      tags: ['Medallion'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            totalRecords: { type: 'number' },
+            dataQualityScore: { type: 'number' },
+            statusDistribution: { type: 'object' },
+            sectionDistribution: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
+    return medallionHandler.getSilverStats(request, reply);
+  });
+
+  // Get Gold layer analytics
+  server.get('/medallion/analytics/summary', {
+    schema: {
+      description: 'Get Gold layer analytics summary',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          period: { type: 'string', description: 'Report period (YYYY-MM format)' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            anomalySummaries: { type: 'array' },
+            equipmentHealth: { type: 'array' },
+            sectionPerformance: { type: 'array' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { period?: string } }>, reply: FastifyReply) => {
+    return medallionHandler.getAnalyticsSummary(request, reply);
+  });
+
+  // Get processing logs
+  server.get('/medallion/logs', {
+    schema: {
+      description: 'Get data processing logs',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 100, default: 20 },
+          jobName: { type: 'string' }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            logs: { type: 'array' },
+            total: { type: 'number' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number; jobName?: string } }>, reply: FastifyReply) => {
+    return medallionHandler.getProcessingLogs(request, reply);
+  });
+
+  // DEBUG ENDPOINTS - View table contents
+  server.get('/medallion/debug/tables', {
+    schema: {
+      description: 'Get all medallion tables with their content (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            bronze: { type: 'object' },
+            silver: { type: 'object' },
+            gold: { type: 'object' },
+            logs: { type: 'object' },
+            users: { type: 'object' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getAllTablesContent(request, reply);
+  });
+
+  // Per-layer debug endpoints
+  server.get('/medallion/debug/tables/bronze', {
+    schema: {
+      description: 'Get Bronze layer tables (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            anomalies: { type: 'array' },
+            equipment: { type: 'array' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getBronzeDebugTables(request, reply);
+  });
+
+  server.get('/medallion/debug/tables/silver', {
+    schema: {
+      description: 'Get Silver layer tables (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            anomalies: { type: 'array' },
+            equipment: { type: 'array' },
+            sections: { type: 'array' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getSilverDebugTables(request, reply);
+  });
+
+  server.get('/medallion/debug/tables/gold', {
+    schema: {
+      description: 'Get Gold layer tables (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            anomalies: { type: 'array' },
+            equipmentHealth: { type: 'array' },
+            sectionPerformance: { type: 'array' }
+          }
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getGoldDebugTables(request, reply);
+  });
+
+  server.get('/medallion/debug/tables/logs', {
+    schema: {
+      description: 'Get processing logs (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'array'
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getLogsDebugTable(request, reply);
+  });
+
+  server.get('/medallion/debug/tables/users', {
+    schema: {
+      description: 'Get users table (DEBUG)',
+      tags: ['Medallion'],
+      querystring: {
+        type: 'object',
+        properties: {
+          limit: { type: 'number', minimum: 1, maximum: 50, default: 10 }
+        }
+      },
+      response: {
+        200: {
+          type: 'array'
+        }
+      }
+    }
+  }, async (request: FastifyRequest<{ Querystring: { limit?: number } }>, reply: FastifyReply) => {
+    return medallionHandler.getUsersDebugTable(request, reply);
+  });
+
+  logger.info('Medallion routes registered successfully');
+} 

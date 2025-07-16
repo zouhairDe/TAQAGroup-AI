@@ -1,0 +1,22 @@
+{
+  "name": "TAQA Morocco - Système de Gestion des Anomalies",
+  "short_name": "TAQA Anomalies",
+  "description": "Plateforme industrielle de gestion centralisée des anomalies critiques",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#00A0DF",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo_2.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "fr",
+  "dir": "ltr"
+} 
