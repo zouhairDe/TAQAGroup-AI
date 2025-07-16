@@ -242,7 +242,7 @@ docker-compose up --build
 ## 📱 Interface Frontend
 
 ### 🏠 Tableau de Bord
-*[�� Capture d'écran du tableau de bord - À ajouter]*
+<img width="1923" height="1001" alt="dashboard" src="https://github.com/user-attachments/assets/6e0ead71-cf5f-4fd3-a7b4-19f66c9f8b61" />
 
 Le tableau de bord principal offre une vue d'ensemble complète avec :
 - **Métriques clés** : Anomalies par criticité (Critique, Normale, Faible)
@@ -251,7 +251,7 @@ Le tableau de bord principal offre une vue d'ensemble complète avec :
 - **Activités récentes** : Historique des actions importantes
 
 ### 🔍 Gestion des Anomalies
-*[📷 Capture d'écran de la page anomalies - À ajouter]*
+<img width="1923" height="1003" alt="gestio-danomalies" src="https://github.com/user-attachments/assets/d3ea4498-d85c-4b79-b3a3-bb55e01a05ee" />
 
 Interface complète pour la gestion des anomalies avec :
 - **Cartes statistiques** : Répartition par criticité et statut
@@ -261,7 +261,7 @@ Interface complète pour la gestion des anomalies avec :
 - **Exports** : CSV, PDF, Excel
 
 ### 📄 Détail d'Anomalie
-*[📷 Capture d'écran du détail d'anomalie - À ajouter]*
+<img width="1923" height="1003" alt="anomaly-details" src="https://github.com/user-attachments/assets/3ca04d5f-6f72-47b7-b3e9-291a6610e8ff" />
 
 Page détaillée pour chaque anomalie incluant :
 - **Informations générales** : Description, équipement, site
@@ -271,7 +271,7 @@ Page détaillée pour chaque anomalie incluant :
 - **Commentaires** : Collaboration entre équipes
 
 ### 📚 Retours d'Expérience (REX)
-*[📷 Capture d'écran de la page REX - À ajouter]*
+<img width="1922" height="1006" alt="rex" src="https://github.com/user-attachments/assets/bf25a091-8a50-4087-91df-46937cae1e7e" />
 
 Système de gestion des connaissances avec :
 - **Bibliothèque REX** : Recherche et consultation
@@ -281,7 +281,7 @@ Système de gestion des connaissances avec :
 - **Réutilisation** : Liens avec anomalies similaires
 
 ### 🗓️ Planification Maintenance
-*[📷 Capture d'écran du calendrier maintenance - À ajouter]*
+<img width="1923" height="1005" alt="planification" src="https://github.com/user-attachments/assets/134ad65b-1e72-4e22-9c8f-d28f24e4f12f" />
 
 Calendrier intégré pour la maintenance avec :
 - **Vue calendrier** : Visualisation des interventions
@@ -290,7 +290,7 @@ Calendrier intégré pour la maintenance avec :
 - **Intégration anomalies** : Lien direct avec les défaillances
 
 ### 🤖 Intelligence Artificielle
-*[📷 Capture d'écran de la page IA - À ajouter]*
+<img width="1923" height="1000" alt="ai-page" src="https://github.com/user-attachments/assets/78d8d4b9-1b1d-4966-88d6-c5476818e182" />
 
 Interface pour les modèles d'IA incluant :
 - **Test d'anomalies** : Prédictions en temps réel
@@ -299,7 +299,6 @@ Interface pour les modèles d'IA incluant :
 - **API et exemples** : Documentation technique
 
 ### 👥 Gestion des Équipes
-*[📷 Capture d'écran de la page équipes - À ajouter]*
 
 Module de gestion des ressources humaines :
 - **Profils d'équipe** : Compétences et disponibilités
@@ -308,7 +307,6 @@ Module de gestion des ressources humaines :
 - **Planning** : Gestion des horaires
 
 ### ⚙️ Paramètres et Profil
-*[📷 Capture d'écran des paramètres - À ajouter]*
 
 Configuration personnalisée avec :
 - **Profil utilisateur** : Informations personnelles
@@ -317,7 +315,6 @@ Configuration personnalisée avec :
 - **Confidentialité** : Paramètres de sécurité
 
 ### ❓ Centre d'Aide
-*[📷 Capture d'écran de l'aide - À ajouter]*
 
 Documentation et support intégrés :
 - **FAQ** : Questions fréquentes
